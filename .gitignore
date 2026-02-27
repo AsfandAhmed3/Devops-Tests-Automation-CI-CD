@@ -1,0 +1,19 @@
+# Maven
+target/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# APK files (too large for git)
+*.apk
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TestNG output
+test-output/
