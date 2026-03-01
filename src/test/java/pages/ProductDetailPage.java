@@ -1,58 +1,45 @@
 package pages;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AndroidFindBy;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
-
-import java.time.Duration;
+import org.openqa.selenium.By;
 
 public class ProductDetailPage {
 
-    private AndroidDriver driver;
+    // IDs discovered from live app via uiautomator dump
+    private static final String SCREEN_ID       = "product screen";
+    private static final String PRICE_ID        = "product price";
+    private static final String ADD_CART_ID     = "Add To Cart button";
+    private static final String NAME_XPATH      =
+            "//*[@content-desc='product screen']//android.widget.TextView[1]";
 
-    @AndroidFindBy(accessibilityId = "test-Description")
-    private WebElement productDescription;
-
-    @AndroidFindBy(xpath = "//android.view.ViewGroup[@content-desc=\"test-Description\"]/android.widget.TextView[1]")
-    private WebElement productName;
-
-    @AndroidFindBy(xpath = "//android.view.ViewGroup[@content-desc=\"test-Description\"]/android.widget.TextView[2]")
-    private WebElement productPrice;
-
-    @AndroidFindBy(accessibilityId = "test-ADD TO CART")
-    private WebElement addToCartButton;
-
-    @AndroidFindBy(accessibilityId = "test-BACK TO PRODUCTS")
-    private WebElement backButton;
+    private final AndroidDriver driver;
 
     public ProductDetailPage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
     }
 
     public boolean isProductDetailScreenDisplayed() {
         try {
-            return productDescription.isDisplayed();
+            return driver.findElement(AppiumBy.accessibilityId(SCREEN_ID)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
 
     public String getProductName() {
-        return productName.getText();
+        return driver.findElement(By.xpath(NAME_XPATH)).getText();
     }
 
     public String getProductPrice() {
-        return productPrice.getText();
+        return driver.findElement(AppiumBy.accessibilityId(PRICE_ID)).getText();
     }
 
     public void tapAddToCart() {
-        addToCartButton.click();
+        driver.findElement(AppiumBy.accessibilityId(ADD_CART_ID)).click();
     }
 
     public void tapBackToProducts() {
-        backButton.click();
+        driver.navigate().back();
     }
 }

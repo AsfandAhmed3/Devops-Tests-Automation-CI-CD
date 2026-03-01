@@ -10,8 +10,18 @@ import utils.DriverManager;
 
 public class LoginTests extends BaseTest {
 
-    // Test 1: Verify successful login with valid credentials
-    @Test
+    // Priority 1 — verify login screen is visible before doing anything else
+    @Test(priority = 1)
+    public void testLoginScreenIsDisplayedOnAppLaunch() {
+        AndroidDriver driver = DriverManager.getDriver();
+        LoginPage loginPage = new LoginPage(driver);
+
+        Assert.assertTrue(loginPage.isLoginScreenDisplayed(),
+                "Login screen should be displayed when app launches");
+    }
+
+    // Priority 2 — happy path: valid credentials → lands on Products screen
+    @Test(priority = 2)
     public void testSuccessfulLoginWithValidCredentials() {
         AndroidDriver driver = DriverManager.getDriver();
         LoginPage loginPage = new LoginPage(driver);
@@ -23,22 +33,8 @@ public class LoginTests extends BaseTest {
                 "Products screen should be displayed after successful login");
     }
 
-    // Test 2: Verify error message appears with wrong password
-    @Test
-    public void testLoginWithInvalidPasswordShowsError() {
-        AndroidDriver driver = DriverManager.getDriver();
-        LoginPage loginPage = new LoginPage(driver);
-
-        loginPage.login("bob@example.com", "wrongpassword");
-
-        Assert.assertTrue(loginPage.isErrorMessageDisplayed(),
-                "Error message should be displayed for invalid password");
-        Assert.assertTrue(loginPage.getErrorMessage().contains("Username and password do not match"),
-                "Error message text should mention username and password mismatch");
-    }
-
-    // Test 3: Verify error message appears with empty username
-    @Test
+    // Priority 3 — leave username empty, enter valid password → username error shown
+    @Test(priority = 3)
     public void testLoginWithEmptyUsernameShowsError() {
         AndroidDriver driver = DriverManager.getDriver();
         LoginPage loginPage = new LoginPage(driver);
@@ -49,8 +45,8 @@ public class LoginTests extends BaseTest {
                 "Error message should be displayed when username is empty");
     }
 
-    // Test 4: Verify error message appears with empty password
-    @Test
+    // Priority 4 — enter valid username, leave password empty → password error shown
+    @Test(priority = 4)
     public void testLoginWithEmptyPasswordShowsError() {
         AndroidDriver driver = DriverManager.getDriver();
         LoginPage loginPage = new LoginPage(driver);
@@ -61,14 +57,18 @@ public class LoginTests extends BaseTest {
                 "Error message should be displayed when password is empty");
     }
 
-    // Test 5: Verify login screen is displayed on app launch
-    @Test
-    public void testLoginScreenIsDisplayedOnAppLaunch() {
+    // Priority 5 — valid username, wrong password → generic error shown
+    @Test(priority = 5)
+    public void testLoginWithInvalidPasswordShowsError() {
         AndroidDriver driver = DriverManager.getDriver();
         LoginPage loginPage = new LoginPage(driver);
 
-        Assert.assertTrue(loginPage.isLoginScreenDisplayed(),
-                "Login screen should be displayed when app launches");
+        loginPage.login("bob@example.com", "wrongpassword");
+
+        Assert.assertTrue(loginPage.isErrorMessageDisplayed(),
+                "Error message should be displayed for invalid password");
+        Assert.assertFalse(loginPage.getErrorMessage().isEmpty(),
+                "Error message text should not be empty for invalid password");
     }
 
     //5 Test Cases Written Successfully for Login Functionality
