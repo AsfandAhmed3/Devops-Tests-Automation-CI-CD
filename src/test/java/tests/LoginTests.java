@@ -70,4 +70,6 @@ public class LoginTests extends BaseTest {
         Assert.assertTrue(loginPage.isLoginScreenDisplayed(),
                 "Login screen should be displayed when app launches");
     }
+
+    //5 Test Cases Written Successfully for Login Functionality
 }
