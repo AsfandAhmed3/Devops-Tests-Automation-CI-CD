@@ -1,46 +1,58 @@
 package pages;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AndroidFindBy;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 
-import java.time.Duration;
+import java.util.List;
 
 public class LoginPage {
 
-    private AndroidDriver driver;
+    // IDs discovered from live app via uiautomator dump
+    private static final String USERNAME_ID  = "Username input field";
+    private static final String PASSWORD_ID  = "Password input field";
+    private static final String LOGIN_BTN_ID = "Login button";
+    private static final String SCREEN_ID    = "login screen";
 
-    @AndroidFindBy(accessibilityId = "test-Username")
-    private WebElement usernameField;
+    // All three error containers used by the app:
+    //   Username-error-message  → shown when username is empty
+    //   Password-error-message  → shown when password is empty
+    //   generic-error-message   → shown for wrong credentials
+    private static final String[] ERROR_CONTAINER_IDS = {
+            "Username-error-message",
+            "Password-error-message",
+            "generic-error-message"
+    };
 
-    @AndroidFindBy(accessibilityId = "test-Password")
-    private WebElement passwordField;
-
-    @AndroidFindBy(accessibilityId = "test-LOGIN")
-    private WebElement loginButton;
-
-    @AndroidFindBy(xpath = "//android.view.ViewGroup[@content-desc=\"test-Error message\"]/android.widget.TextView")
-    private WebElement errorMessage;
+    private final AndroidDriver driver;
 
     public LoginPage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
     }
 
     public void enterUsername(String username) {
-        usernameField.clear();
-        usernameField.sendKeys(username);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(USERNAME_ID));
+        field.clear();
+        if (username != null && !username.isEmpty()) {
+            field.sendKeys(username);
+        }
     }
 
     public void enterPassword(String password) {
-        passwordField.clear();
-        passwordField.sendKeys(password);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(PASSWORD_ID));
+        field.clear();
+        if (password != null && !password.isEmpty()) {
+            field.sendKeys(password);
+        }
     }
 
     public void tapLogin() {
-        loginButton.click();
+        // Dismiss keyboard if visible — wrapped in try/catch because
+        // hideKeyboard() throws if the keyboard is already hidden
+        try { driver.hideKeyboard(); } catch (Exception ignored) {}
+        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        driver.findElement(AppiumBy.accessibilityId(LOGIN_BTN_ID)).click();
     }
 
     public void login(String username, String password) {
@@ -49,21 +61,60 @@ public class LoginPage {
         tapLogin();
     }
 
-    public String getErrorMessage() {
-        return errorMessage.getText();
+    /**
+     * Returns true if ANY of the three error containers is visible.
+     * Waits up to 3 seconds for the app to render the error.
+     */
+    public boolean isErrorMessageDisplayed() {
+        // Give the app time to show the validation error
+        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+
+        for (String errorId : ERROR_CONTAINER_IDS) {
+            try {
+                List<WebElement> els = driver.findElements(
+                        AppiumBy.accessibilityId(errorId));
+                if (!els.isEmpty() && els.get(0).isDisplayed()) {
+                    return true;
+                }
+            } catch (Exception ignored) {}
+        }
+        return false;
     }
 
-    public boolean isErrorMessageDisplayed() {
-        try {
-            return errorMessage.isDisplayed();
-        } catch (Exception e) {
-            return false;
+    /**
+     * Returns the text of whichever error container is currently visible.
+     * Checks all three containers; returns empty string if none found.
+     */
+    public String getErrorMessage() {
+        for (String errorId : ERROR_CONTAINER_IDS) {
+            try {
+                WebElement container = driver.findElement(
+                        AppiumBy.accessibilityId(errorId));
+                if (!container.isDisplayed()) continue;
+
+                // Try direct getText() on the container first
+                String text = container.getText();
+                if (text != null && !text.trim().isEmpty()) {
+                    return text.trim();
+                }
+
+                // Fall back to child TextViews
+                List<WebElement> children = container
+                        .findElements(By.className("android.widget.TextView"));
+                for (WebElement child : children) {
+                    String childText = child.getText();
+                    if (childText != null && !childText.trim().isEmpty()) {
+                        return childText.trim();
+                    }
+                }
+            } catch (Exception ignored) {}
         }
+        return "";
     }
 
     public boolean isLoginScreenDisplayed() {
         try {
-            return loginButton.isDisplayed();
+            return driver.findElement(AppiumBy.accessibilityId(SCREEN_ID)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
