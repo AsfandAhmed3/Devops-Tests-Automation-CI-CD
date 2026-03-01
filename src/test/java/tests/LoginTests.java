@@ -70,6 +70,4 @@ public class LoginTests extends BaseTest {
         Assert.assertFalse(loginPage.getErrorMessage().isEmpty(),
                 "Error message text should not be empty for invalid password");
     }
-
-    //5 Test Cases Written Successfully for Login Functionality
 }

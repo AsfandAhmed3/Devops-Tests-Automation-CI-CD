@@ -8,11 +8,10 @@ import java.util.List;
 
 public class CartPage {
 
-    // IDs discovered from live app via uiautomator dump
-    private static final String SCREEN_ID    = "cart screen";
-    private static final String ITEM_ID      = "product row";
-    private static final String REMOVE_ID    = "remove item";
-    private static final String CHECKOUT_ID  = "Proceed To Checkout button";
+    private static final String SCREEN_ID   = "cart screen";
+    private static final String ITEM_ID     = "product row";
+    private static final String REMOVE_ID   = "remove item";
+    private static final String CHECKOUT_ID = "Proceed To Checkout button";
 
     private final AndroidDriver driver;
 
@@ -34,9 +33,7 @@ public class CartPage {
 
     public void removeFirstItem() {
         List<WebElement> deletes = driver.findElements(AppiumBy.accessibilityId(REMOVE_ID));
-        if (!deletes.isEmpty()) {
-            deletes.get(0).click();
-        }
+        if (!deletes.isEmpty()) deletes.get(0).click();
     }
 
     public boolean isCartEmpty() {

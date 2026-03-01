@@ -9,10 +9,10 @@ import java.util.List;
 
 public class ProductsPage {
 
-    // IDs discovered from live app via uiautomator dump
-    private static final String SCREEN_ID    = "products screen";
-    private static final String ITEM_ID      = "store item";
-    private static final String SORT_BTN_ID  = "sort button";
+    // IDs confirmed via uiautomator dump on live device
+    private static final String SCREEN_ID     = "products screen";
+    private static final String ITEM_ID       = "store item";
+    private static final String SORT_BTN_ID   = "sort button";
     private static final String CART_BADGE_ID = "cart badge";
 
     private final AndroidDriver driver;
@@ -35,9 +35,7 @@ public class ProductsPage {
 
     public void tapFirstProduct() {
         List<WebElement> items = driver.findElements(AppiumBy.accessibilityId(ITEM_ID));
-        if (!items.isEmpty()) {
-            items.get(0).click();
-        }
+        if (!items.isEmpty()) items.get(0).click();
     }
 
     public void tapProductByIndex(int index) {

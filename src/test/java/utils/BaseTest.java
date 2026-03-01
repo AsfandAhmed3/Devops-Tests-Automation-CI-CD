@@ -23,14 +23,12 @@ public class BaseTest {
         // Clear app data so no saved login state, then relaunch (lands on Products)
         DriverManager.getDriver().executeScript("mobile: clearApp", Map.of("appId", APP_PACKAGE));
         DriverManager.getDriver().activateApp(APP_PACKAGE);
-        // Wait for Products screen to fully load
         try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
 
         // Open sidebar → tap Log In
         DriverManager.getDriver().findElement(AppiumBy.accessibilityId(MENU_BTN_ID)).click();
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
         DriverManager.getDriver().findElement(AppiumBy.accessibilityId(LOGIN_ITEM_ID)).click();
-        // Wait for login screen
         try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
     }
 

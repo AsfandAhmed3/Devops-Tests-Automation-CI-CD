@@ -6,11 +6,11 @@ import org.openqa.selenium.By;
 
 public class ProductDetailPage {
 
-    // IDs discovered from live app via uiautomator dump
-    private static final String SCREEN_ID       = "product screen";
-    private static final String PRICE_ID        = "product price";
-    private static final String ADD_CART_ID     = "Add To Cart button";
-    private static final String NAME_XPATH      =
+    // IDs confirmed via uiautomator dump on live device
+    private static final String SCREEN_ID   = "product screen";
+    private static final String PRICE_ID    = "product price";
+    private static final String ADD_CART_ID = "Add To Cart button";
+    private static final String NAME_XPATH  =
             "//*[@content-desc='product screen']//android.widget.TextView[1]";
 
     private final AndroidDriver driver;
