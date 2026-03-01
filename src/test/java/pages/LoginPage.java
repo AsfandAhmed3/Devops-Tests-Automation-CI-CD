@@ -1,46 +1,46 @@
 package pages;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AndroidFindBy;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 
-import java.time.Duration;
+import java.util.List;
 
 public class LoginPage {
 
-    private AndroidDriver driver;
+    private static final String USERNAME_ID  = "Username input field";
+    private static final String PASSWORD_ID  = "Password input field";
+    private static final String LOGIN_BTN_ID = "Login button";
+    private static final String SCREEN_ID    = "login screen";
+    private static final String[] ERROR_CONTAINER_IDS = {
+            "Username-error-message",
+            "Password-error-message",
+            "generic-error-message"
+    };
 
-    @AndroidFindBy(accessibilityId = "test-Username")
-    private WebElement usernameField;
-
-    @AndroidFindBy(accessibilityId = "test-Password")
-    private WebElement passwordField;
-
-    @AndroidFindBy(accessibilityId = "test-LOGIN")
-    private WebElement loginButton;
-
-    @AndroidFindBy(xpath = "//android.view.ViewGroup[@content-desc=\"test-Error message\"]/android.widget.TextView")
-    private WebElement errorMessage;
+    private final AndroidDriver driver;
 
     public LoginPage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
     }
 
     public void enterUsername(String username) {
-        usernameField.clear();
-        usernameField.sendKeys(username);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(USERNAME_ID));
+        field.clear();
+        if (username != null && !username.isEmpty()) field.sendKeys(username);
     }
 
     public void enterPassword(String password) {
-        passwordField.clear();
-        passwordField.sendKeys(password);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(PASSWORD_ID));
+        field.clear();
+        if (password != null && !password.isEmpty()) field.sendKeys(password);
     }
 
     public void tapLogin() {
-        loginButton.click();
+        try { driver.hideKeyboard(); } catch (Exception ignored) {}
+        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        driver.findElement(AppiumBy.accessibilityId(LOGIN_BTN_ID)).click();
     }
 
     public void login(String username, String password) {
@@ -49,21 +49,37 @@ public class LoginPage {
         tapLogin();
     }
 
-    public String getErrorMessage() {
-        return errorMessage.getText();
+    public boolean isErrorMessageDisplayed() {
+        try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+        for (String errorId : ERROR_CONTAINER_IDS) {
+            try {
+                List<WebElement> els = driver.findElements(AppiumBy.accessibilityId(errorId));
+                if (!els.isEmpty() && els.get(0).isDisplayed()) return true;
+            } catch (Exception ignored) {}
+        }
+        return false;
     }
 
-    public boolean isErrorMessageDisplayed() {
-        try {
-            return errorMessage.isDisplayed();
-        } catch (Exception e) {
-            return false;
+    public String getErrorMessage() {
+        for (String errorId : ERROR_CONTAINER_IDS) {
+            try {
+                WebElement container = driver.findElement(AppiumBy.accessibilityId(errorId));
+                if (!container.isDisplayed()) continue;
+                String text = container.getText();
+                if (text != null && !text.trim().isEmpty()) return text.trim();
+                List<WebElement> children = container.findElements(By.className("android.widget.TextView"));
+                for (WebElement child : children) {
+                    String t = child.getText();
+                    if (t != null && !t.trim().isEmpty()) return t.trim();
+                }
+            } catch (Exception ignored) {}
         }
+        return "";
     }
 
     public boolean isLoginScreenDisplayed() {
         try {
-            return loginButton.isDisplayed();
+            return driver.findElement(AppiumBy.accessibilityId(SCREEN_ID)).isDisplayed();
         } catch (Exception e) {
             return false;
         }

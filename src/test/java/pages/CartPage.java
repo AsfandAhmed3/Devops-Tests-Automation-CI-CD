@@ -1,65 +1,50 @@
 package pages;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AndroidFindBy;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 
-import java.time.Duration;
 import java.util.List;
 
 public class CartPage {
-    //CartPage
-    private AndroidDriver driver;
 
-    @AndroidFindBy(accessibilityId = "test-Cart Content")
-    private WebElement cartContent;
+    private static final String SCREEN_ID   = "cart screen";
+    private static final String ITEM_ID     = "product row";
+    private static final String REMOVE_ID   = "remove item";
+    private static final String CHECKOUT_ID = "Proceed To Checkout button";
 
-    @AndroidFindBy(accessibilityId = "test-Item")
-    private List<WebElement> cartItems;
-
-    @AndroidFindBy(accessibilityId = "test-CHECKOUT")
-    private WebElement checkoutButton;
-
-    @AndroidFindBy(accessibilityId = "test-CONTINUE SHOPPING")
-    private WebElement continueShoppingButton;
-
-    @AndroidFindBy(accessibilityId = "test-DELETE")
-    private List<WebElement> deleteButtons;
+    private final AndroidDriver driver;
 
     public CartPage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
     }
 
     public boolean isCartScreenDisplayed() {
         try {
-            return cartContent.isDisplayed();
+            return driver.findElement(AppiumBy.accessibilityId(SCREEN_ID)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
 
     public int getCartItemCount() {
-        return cartItems.size();
+        return driver.findElements(AppiumBy.accessibilityId(ITEM_ID)).size();
     }
 
     public void removeFirstItem() {
-        if (!deleteButtons.isEmpty()) {
-            deleteButtons.get(0).click();
-        }
+        List<WebElement> deletes = driver.findElements(AppiumBy.accessibilityId(REMOVE_ID));
+        if (!deletes.isEmpty()) deletes.get(0).click();
     }
 
     public boolean isCartEmpty() {
-        return cartItems.isEmpty();
+        return driver.findElements(AppiumBy.accessibilityId(ITEM_ID)).isEmpty();
     }
 
     public void tapCheckout() {
-        checkoutButton.click();
+        driver.findElement(AppiumBy.accessibilityId(CHECKOUT_ID)).click();
     }
 
     public void tapContinueShopping() {
-        continueShoppingButton.click();
+        driver.navigate().back();
     }
 }
