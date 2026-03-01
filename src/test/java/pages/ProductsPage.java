@@ -13,6 +13,7 @@ public class ProductsPage {
     private static final String SCREEN_ID    = "products screen";
     private static final String ITEM_ID      = "store item";
     private static final String SORT_BTN_ID  = "sort button";
+    private static final String CART_BADGE_ID = "cart badge";
 
     private final AndroidDriver driver;
 
@@ -61,5 +62,17 @@ public class ProductsPage {
     public void sortByPriceDescending() {
         driver.findElement(AppiumBy.accessibilityId(SORT_BTN_ID)).click();
         driver.findElement(By.xpath("//android.widget.TextView[@text=\"Price (descending)\"]")).click();
+    }
+
+    public boolean isCartBadgeDisplayed() {
+        try {
+            return driver.findElement(AppiumBy.accessibilityId(CART_BADGE_ID)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void tapCartIcon() {
+        driver.findElement(AppiumBy.accessibilityId(CART_BADGE_ID)).click();
     }
 }
