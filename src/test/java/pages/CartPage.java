@@ -10,7 +10,7 @@ import java.time.Duration;
 import java.util.List;
 
 public class CartPage {
-
+    //CartPage
     private AndroidDriver driver;
 
     @AndroidFindBy(accessibilityId = "test-Cart Content")
