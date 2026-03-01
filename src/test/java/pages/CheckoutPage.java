@@ -1,59 +1,46 @@
 package pages;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AndroidFindBy;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
-
-import java.time.Duration;
 
 public class CheckoutPage {
 
-    private AndroidDriver driver;
+    // IDs discovered from live app via uiautomator dump
+    // Note: this app uses Full Name (combined), not separate first/last name fields
+    private static final String FULL_NAME_ID  = "Full Name* input field";
+    private static final String ADDRESS_ID    = "Address Line 1* input field";
+    private static final String ZIP_ID        = "Zip Code* input field";
+    private static final String CONTINUE_ID   = "To Payment button";
+    private static final String ERROR_XPATH   =
+            "//*[@content-desc='generic-error-message']//android.widget.TextView";
+    private static final String COMPLETE_XPATH =
+            "//android.widget.TextView[@text='Thank you for your order!']";
 
-    @AndroidFindBy(accessibilityId = "test-First Name")
-    private WebElement firstNameField;
-
-    @AndroidFindBy(accessibilityId = "test-Last Name")
-    private WebElement lastNameField;
-
-    @AndroidFindBy(accessibilityId = "test-Zip/Postal Code")
-    private WebElement zipCodeField;
-
-    @AndroidFindBy(accessibilityId = "test-CONTINUE")
-    private WebElement continueButton;
-
-    @AndroidFindBy(accessibilityId = "test-FINISH")
-    private WebElement finishButton;
-
-    @AndroidFindBy(accessibilityId = "test-CHECKOUT: COMPLETE!")
-    private WebElement checkoutComplete;
-
-    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Thank you for your order!\"]")
-    private WebElement thankYouMessage;
-
-    @AndroidFindBy(xpath = "//android.view.ViewGroup[@content-desc=\"test-Error message\"]/android.widget.TextView")
-    private WebElement errorMessage;
+    private final AndroidDriver driver;
 
     public CheckoutPage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
     }
 
+    /** Sets Full Name field (app combines first+last into one field) */
     public void enterFirstName(String firstName) {
-        firstNameField.clear();
-        firstNameField.sendKeys(firstName);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(FULL_NAME_ID));
+        field.clear();
+        field.sendKeys(firstName);
     }
 
+    /** Appends last name to Full Name field */
     public void enterLastName(String lastName) {
-        lastNameField.clear();
-        lastNameField.sendKeys(lastName);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(FULL_NAME_ID));
+        field.sendKeys(" " + lastName);
     }
 
     public void enterZipCode(String zipCode) {
-        zipCodeField.clear();
-        zipCodeField.sendKeys(zipCode);
+        WebElement field = driver.findElement(AppiumBy.accessibilityId(ZIP_ID));
+        field.clear();
+        field.sendKeys(zipCode);
     }
 
     public void fillCheckoutForm(String firstName, String lastName, String zipCode) {
@@ -63,16 +50,18 @@ public class CheckoutPage {
     }
 
     public void tapContinue() {
-        continueButton.click();
+        driver.hideKeyboard();
+        driver.findElement(AppiumBy.accessibilityId(CONTINUE_ID)).click();
     }
 
     public void tapFinish() {
-        finishButton.click();
+        // Finish button appears on the order review screen after tapContinue()
+        driver.findElement(By.xpath("//android.widget.TextView[@text='Place Order']")).click();
     }
 
     public boolean isOrderCompleted() {
         try {
-            return thankYouMessage.isDisplayed();
+            return driver.findElement(By.xpath(COMPLETE_XPATH)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -80,13 +69,13 @@ public class CheckoutPage {
 
     public boolean isErrorMessageDisplayed() {
         try {
-            return errorMessage.isDisplayed();
+            return driver.findElement(By.xpath(ERROR_XPATH)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
 
     public String getErrorMessage() {
-        return errorMessage.getText();
+        return driver.findElement(By.xpath(ERROR_XPATH)).getText();
     }
 }

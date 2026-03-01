@@ -1,83 +1,78 @@
 package pages;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AndroidFindBy;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 
-import java.time.Duration;
 import java.util.List;
 
 public class ProductsPage {
 
-    private AndroidDriver driver;
+    // IDs discovered from live app via uiautomator dump
+    private static final String SCREEN_ID    = "products screen";
+    private static final String ITEM_ID      = "store item";
+    private static final String SORT_BTN_ID  = "sort button";
+    private static final String CART_BADGE_ID = "cart badge";
 
-    @AndroidFindBy(accessibilityId = "test-PRODUCTS")
-    private WebElement productsHeader;
-
-    @AndroidFindBy(accessibilityId = "test-Item")
-    private List<WebElement> productItems;
-
-    @AndroidFindBy(accessibilityId = "test-Modal Selector Button")
-    private WebElement sortButton;
-
-    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Name (A to Z)\"]")
-    private WebElement sortByNameAZ;
-
-    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Name (Z to A)\"]")
-    private WebElement sortByNameZA;
-
-    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Price (ascending)\"]")
-    private WebElement sortByPriceAsc;
-
-    @AndroidFindBy(xpath = "//android.widget.TextView[@text=\"Price (descending)\"]")
-    private WebElement sortByPriceDesc;
+    private final AndroidDriver driver;
 
     public ProductsPage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver, Duration.ofSeconds(10)), this);
     }
 
     public boolean isProductsScreenDisplayed() {
         try {
-            return productsHeader.isDisplayed();
+            return driver.findElement(AppiumBy.accessibilityId(SCREEN_ID)).isDisplayed();
         } catch (Exception e) {
             return false;
         }
     }
 
     public int getProductCount() {
-        return productItems.size();
+        return driver.findElements(AppiumBy.accessibilityId(ITEM_ID)).size();
     }
 
     public void tapFirstProduct() {
-        if (!productItems.isEmpty()) {
-            productItems.get(0).click();
+        List<WebElement> items = driver.findElements(AppiumBy.accessibilityId(ITEM_ID));
+        if (!items.isEmpty()) {
+            items.get(0).click();
         }
     }
 
     public void tapProductByIndex(int index) {
-        productItems.get(index).click();
+        driver.findElements(AppiumBy.accessibilityId(ITEM_ID)).get(index).click();
     }
 
     public void sortByNameAZ() {
-        sortButton.click();
-        sortByNameAZ.click();
+        driver.findElement(AppiumBy.accessibilityId(SORT_BTN_ID)).click();
+        driver.findElement(By.xpath("//android.widget.TextView[@text=\"Name (A to Z)\"]")).click();
     }
 
     public void sortByNameZA() {
-        sortButton.click();
-        sortByNameZA.click();
+        driver.findElement(AppiumBy.accessibilityId(SORT_BTN_ID)).click();
+        driver.findElement(By.xpath("//android.widget.TextView[@text=\"Name (Z to A)\"]")).click();
     }
 
     public void sortByPriceAscending() {
-        sortButton.click();
-        sortByPriceAsc.click();
+        driver.findElement(AppiumBy.accessibilityId(SORT_BTN_ID)).click();
+        driver.findElement(By.xpath("//android.widget.TextView[@text=\"Price (ascending)\"]")).click();
     }
 
     public void sortByPriceDescending() {
-        sortButton.click();
-        sortByPriceDesc.click();
+        driver.findElement(AppiumBy.accessibilityId(SORT_BTN_ID)).click();
+        driver.findElement(By.xpath("//android.widget.TextView[@text=\"Price (descending)\"]")).click();
+    }
+
+    public boolean isCartBadgeDisplayed() {
+        try {
+            return driver.findElement(AppiumBy.accessibilityId(CART_BADGE_ID)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public void tapCartIcon() {
+        driver.findElement(AppiumBy.accessibilityId(CART_BADGE_ID)).click();
     }
 }

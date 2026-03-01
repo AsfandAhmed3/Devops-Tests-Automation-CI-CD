@@ -8,4 +8,10 @@
         </classes>
     </test>
 
+    <test name="Product Tests">
+        <classes>
+            <class name="tests.ProductTests"/>
+        </classes>
+    </test>
+
 </suite>
