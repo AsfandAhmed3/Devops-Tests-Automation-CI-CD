@@ -66,14 +66,15 @@ Devops-Tests-Automation-CI-CD/
 │       │   │   └── ProductsPage.java
 │       │   │
 │       │   ├── tests/               # Test classes
-│       │   │   └── LoginTests.java
+│       │   │   ├── LoginTests.java  # 5 login test cases
+│       │   │   └── ProductTests.java # 5 product/cart test cases
 │       │   │
 │       │   └── utils/               # Utility classes
 │       │       ├── BaseTest.java    # Base test setup/teardown
 │       │       └── DriverManager.java # WebDriver management
 │       │
 │       └── resources/
-│           └── MyDemoAppRN.apk      # Android application under test
+│           └── (test resources)
 │
 ├── pom.xml                          # Maven configuration
 ├── testng.xml                       # TestNG suite configuration
@@ -135,9 +136,10 @@ Before running the tests, ensure you have the following installed:
    mvn clean install -DskipTests
    ```
 
-3. **Place the APK file**
-   - Ensure `MyDemoAppRN.apk` is placed in `src/test/resources/` directory
-   - Or update the APK path in `DriverManager.java`
+3. **Install the APK on your device**
+   - Connect Android device via USB with USB debugging enabled
+   - Run: `adb install -r path/to/MyDemoAppRN.apk`
+   - The app package `com.saucelabs.mydemoapp.rn` must be installed before running tests
 
 4. **Verify Android device connection**
    ```bash
@@ -203,17 +205,27 @@ TestNG generates HTML reports in `test-output/` directory after test execution.
 
 ### Login Tests (LoginTests.java)
 
-| Test Case | Description | Status |
-|-----------|-------------|--------|
-| `testSuccessfulLoginWithValidCredentials` | Verifies successful login with valid username and password | ✅ |
-| `testLoginWithInvalidPasswordShowsError` | Verifies error message for incorrect password | ✅ |
-| `testLoginWithEmptyUsernameShowsError` | Verifies error message when username field is empty | ✅ |
-| `testLoginWithEmptyPasswordShowsError` | Verifies error message when password field is empty | ✅ |
-| `testLoginScreenIsDisplayedOnAppLaunch` | Verifies login screen displays on app launch | ✅ |
+| # | Test Case | Description | Status |
+|---|-----------|-------------|--------|
+| 1 | `testLoginScreenIsDisplayedOnAppLaunch` | Verifies login screen displays when navigating to Login | ✅ |
+| 2 | `testSuccessfulLoginWithValidCredentials` | Verifies successful login with valid username and password | ✅ |
+| 3 | `testLoginWithEmptyUsernameShowsError` | Verifies error message when username field is empty | ✅ |
+| 4 | `testLoginWithEmptyPasswordShowsError` | Verifies error message when password field is empty | ✅ |
+| 5 | `testLoginWithInvalidPasswordShowsError` | Verifies error message for incorrect password | ✅ |
 
 **Test Credentials:**
 - Valid Username: `bob@example.com`
 - Valid Password: `10203040`
+
+### Product Tests (ProductTests.java)
+
+| # | Test Case | Description | Status |
+|---|-----------|-------------|--------|
+| 6 | `testProductsScreenIsDisplayedOnAppLaunch` | Verifies Products screen is shown on app launch | ✅ |
+| 7 | `testProductListIsNotEmpty` | Verifies at least one product is listed | ✅ |
+| 8 | `testTappingProductOpensDetailScreen` | Verifies tapping a product opens Product Detail screen | ✅ |
+| 9 | `testAddProductToCartUpdatesCartBadge` | Verifies cart badge appears after adding a product | ✅ |
+| 10 | `testCartShowsAddedProduct` | Verifies cart screen contains the added product | ✅ |
 
 ## 🏗 Framework Architecture
 
@@ -251,9 +263,9 @@ The framework implements the Page Object Model design pattern for better maintai
 - Base class for all test classes
 
 **3. Page Objects**
-- Encapsulate page elements using `@AndroidFindBy` annotations
-- Provide methods for page interactions
-- Use AppiumFieldDecorator for element initialization
+- Encapsulate element locators using `AppiumBy.accessibilityId()` with IDs discovered via `uiautomator dump`
+- Provide action methods (tap, enter text, check visibility)
+- No code duplication — each screen has exactly one Page class
 
 **4. Test Classes**
 - Extend `BaseTest` for setup/teardown
@@ -280,19 +292,35 @@ Configured in `pom.xml` for automated test execution:
 </plugin>
 ```
 
-### CI/CD Pipeline Example
+### GitHub Actions Pipeline
+
+The pipeline is defined in `.github/workflows/ci.yml` and:
+- **Triggers** on every push to `main` and every Pull Request targeting `main`
+- **Sets up** Java 17 (Temurin) with Maven dependency caching
+- **Compiles** all source and test classes (`mvn clean test-compile`)
+- **Validates** the full build passes (`mvn verify -DskipTests`)
+- **Uploads** build artifacts for inspection
+
+> **Note:** Full Appium test execution requires a connected Android device and is run locally.
+> The CI pipeline validates the build and compilation — device tests are demonstrated locally
+> (see screenshots in the repository).
 
 ```yaml
-# Example for GitHub Actions / Azure DevOps / Jenkins
-steps:
-  - name: Checkout code
-  - name: Set up JDK 17
-  - name: Set up Android SDK
-  - name: Start Appium Server
-  - name: Start Android Emulator
-  - name: Run tests
-    command: mvn clean test
-  - name: Publish test reports
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { java-version: '17', distribution: 'temurin' }
+      - run: mvn clean test-compile --no-transfer-progress
+      - run: mvn verify -DskipTests --no-transfer-progress
 ```
 
 ### Best Practices for CI/CD
@@ -302,6 +330,43 @@ steps:
 - Use cloud device farms (BrowserStack, Sauce Labs, AWS Device Farm)
 - Archive test reports and artifacts
 - Implement retry mechanism for flaky tests
+
+## 🌿 Git Workflow
+
+This project follows a structured feature-branch Git workflow.
+
+### Branching Strategy
+
+```
+main                            ← protected, no direct commits
+ └── feature/issue-1-repo-and-framework-setup
+ └── feature/issue-2-page-object-model
+ └── feature/issue-3-first-5-test-cases
+ └── feature/issue-4-basetest-initialization
+ └── feature/issue-5-config-git-actions
+ └── feature/issue-6-automate-test-cases
+ └── feature/issue-7-project-documentation
+```
+
+### Rules
+
+- **No direct commits to `main`** — all changes go through Pull Requests
+- **One branch per issue** — each feature/task has its own branch
+- **Meaningful commit messages** — follow `type: description` format (e.g. `feat:`, `fix:`, `ci:`, `docs:`)
+- **PR reviews required** — at least one approval before merging
+- **Issues track tasks** — each branch is linked to a GitHub Issue
+
+### Commit Message Format
+
+```
+feat: add new feature
+fix: resolve a bug
+ci: update pipeline configuration
+docs: update documentation
+chore: maintenance tasks
+```
+
+---
 
 ## 🤝 Contributing
 
